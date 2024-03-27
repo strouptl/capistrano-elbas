@@ -3,12 +3,13 @@ module Elbas
     class InstanceCollection < Base
       include Enumerable
 
-      attr_reader :instances
+      attr_reader :instances, :options
 
-      def initialize(ids)
+      def initialize(ids, options = {})
         @ids = ids
+        @options = options
         @instances = query_instances_by_ids(ids).map do |i|
-          Instance.new(i.instance_id, i.state.code)
+          Instance.new(i.instance_id, i.state.code, @options)
         end
       end
 

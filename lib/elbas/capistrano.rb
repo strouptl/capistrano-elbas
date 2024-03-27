@@ -8,18 +8,18 @@ def autoscale(groupname, properties = {})
 
   set :aws_autoscale_group_names, Array(fetch(:aws_autoscale_group_names)).push(groupname)
 
-  asg = Elbas::AWS::AutoscaleGroup.new groupname
+  asg = Elbas::AWS::AutoscaleGroup.new groupname, properties
   instances = asg.instances.running
 
   info "Auto Scaling Group: #{groupname}"
   instances.each.with_index do |instance, i|
-    info "Adding server: #{instance.hostname}"
+    info "Adding server: #{instance.destination}"
 
     props = nil
     props = yield(instance, i) if block_given?
     props ||= properties
 
-    server instance.hostname, props
+    server instance.destination, props
   end
 
   if instances.any?

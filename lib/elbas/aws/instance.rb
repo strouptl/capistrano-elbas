@@ -3,11 +3,12 @@ module Elbas
     class Instance < Base
       STATE_RUNNING = 16.freeze
 
-      attr_reader :aws_counterpart, :id, :state
+      attr_reader :aws_counterpart, :id, :state, :options
 
-      def initialize(id, state)
+      def initialize(id, state, options = {})
         @id = id
         @state = state
+        @options = options
         @aws_counterpart = aws_namespace::Instance.new id, client: aws_client
       end
 
@@ -27,8 +28,18 @@ module Elbas
         "[#{ipv_6_address}]"
       end
 
-      def hostname
-        @hostname ||= [public_dns_hostname, ip_address, formatted_ipv_6_address].detect { |a| !a.nil? and !a.empty? }
+      def auto_destination
+        [public_dns_hostname, ip_address, formatted_ipv_6_address].detect { |a| !a.nil? and !a.empty? }
+      end
+
+      def destination
+        @destination ||= if options[:ipv_4]
+                           ip_address
+                         elsif options[:ipv_6]
+                           formatted_ipv_6_address
+                         else
+                           auto_destination
+                         end
       end
 
       def running?

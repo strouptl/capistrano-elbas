@@ -1,10 +1,11 @@
 module Elbas
   module AWS
     class AutoscaleGroup < Base
-      attr_reader :name
+      attr_reader :name, :options
 
-      def initialize(name)
+      def initialize(name, options = {})
         @name = name
+        @options = options
         @aws_counterpart = query_autoscale_group_by_name(name)
       end
 
@@ -13,7 +14,7 @@ module Elbas
       end
 
       def instances
-        InstanceCollection.new instance_ids
+        InstanceCollection.new instance_ids, options
       end
 
       def launch_template
